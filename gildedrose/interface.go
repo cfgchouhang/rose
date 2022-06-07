@@ -64,9 +64,9 @@ func (a *ItemNormal) Update() {
 	}
 }
 
-func (a *ItemBase) UpdateQuality() {
-	a.op.Update()
-	a.postCheck()
+func UpdateQualityIB(ib *ItemBase) {
+	ib.op.Update()
+	ib.postCheck()
 }
 
 func (a *ItemBase) postCheck() {
@@ -108,6 +108,6 @@ func convert(item *Item) *ItemBase {
 func UpdateQualityTemplate(items []*Item) {
 	for _, item := range items {
 		ib := convert(item)
-		ib.UpdateQuality()
+		UpdateQualityIB(ib)
 	}
 }
