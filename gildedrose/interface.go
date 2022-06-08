@@ -1,11 +1,7 @@
 package gildedrose
 
-type ItemOp interface {
+type AbstractItem interface {
 	Update()
-}
-type ItemBase struct {
-	op   ItemOp
-	item *Item
 }
 
 type ItemSulf struct {
@@ -26,16 +22,17 @@ type ItemNormal struct {
 
 func (a *ItemSulf) Update() {
 }
+
 func (a *ItemBrie) Update() {
 	a.item.SellIn -= 1
 	a.item.Quality += 1
 	if a.item.SellIn < 0 {
 		a.item.Quality += 1
 	}
+	PostCheck(a.item)
 }
 func (a *ItemPass) Update() {
 	a.item.SellIn -= 1
-
 	if a.item.SellIn < 0 {
 		a.item.Quality = 0
 		return
@@ -47,6 +44,7 @@ func (a *ItemPass) Update() {
 	} else if a.item.SellIn < 10 {
 		a.item.Quality += 1
 	}
+	PostCheck(a.item)
 }
 func (a *ItemConj) Update() {
 	a.item.SellIn -= 1
@@ -55,6 +53,7 @@ func (a *ItemConj) Update() {
 	if a.item.SellIn < 0 {
 		a.item.Quality -= 2
 	}
+	PostCheck(a.item)
 }
 func (a *ItemNormal) Update() {
 	a.item.SellIn -= 1
@@ -62,33 +61,23 @@ func (a *ItemNormal) Update() {
 	if a.item.SellIn < 0 {
 		a.item.Quality -= 1
 	}
+	PostCheck(a.item)
 }
 
-func UpdateQualityIB(ib *ItemBase) {
-	ib.op.Update()
-	ib.postCheck()
-}
-
-func (a *ItemBase) postCheck() {
-	if a.item.Name == "Sulfuras, Hand of Ragnaros" {
-		return
-	}
-
-	if a.item.Quality < 0 {
-		a.item.Quality = 0
-	} else if a.item.Quality > 50 {
-		a.item.Quality = 50
+func PostCheck(item *Item) {
+	if item.Quality < 0 {
+		item.Quality = 0
+	} else if item.Quality > 50 {
+		item.Quality = 50
 	}
 }
 
-func ItemBaseInit(item *Item, cust ItemOp) *ItemBase {
-	base := &ItemBase{item: item}
-	base.op = cust
-	return base
+func UpdateItemQuality(item AbstractItem) {
+	item.Update()
 }
 
-func convert(item *Item) *ItemBase {
-	var cust ItemOp
+func convert(item *Item) AbstractItem {
+	var cust AbstractItem
 
 	if item.Name == "Sulfuras, Hand of Ragnaros" {
 		cust = &ItemSulf{item}
@@ -102,12 +91,12 @@ func convert(item *Item) *ItemBase {
 		cust = &ItemNormal{item}
 	}
 
-	return ItemBaseInit(item, cust)
+	return cust
 }
 
-func UpdateQualityTemplate(items []*Item) {
+func UpdateQualityInterface(items []*Item) {
 	for _, item := range items {
-		ib := convert(item)
-		UpdateQualityIB(ib)
+		abi := convert(item)
+		UpdateItemQuality(abi)
 	}
 }
